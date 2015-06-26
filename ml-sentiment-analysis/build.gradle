@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.5
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.ohmdb:ohmdb-all:1.0.0'
+    compile 'org.jsoup:jsoup:1.7.2'
+    compile 'net.sf.opencsv:opencsv:2.3'
+    compile 'cc.mallet:mallet:2.0.7'
+    compile 'commons-io:commons-io:2.4'
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.0-rc2'
+    compile 'org.mongodb:mongo-java-driver:3.0.2'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'edu.stanford.nlp:stanford-corenlp:3.3.0'
+    compile 'edu.stanford.nlp:stanford-corenlp:3.3.0:models'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
