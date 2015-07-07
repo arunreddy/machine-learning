@@ -105,3 +105,5 @@ local.properties
 *.dataset
 *.dat
 
+
+dataStore/
