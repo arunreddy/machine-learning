@@ -1,5 +1,5 @@
 /*
- * MainClass.java
+ * AbstractSentimentAnalyzer.java
  *
  * Copyright (c) 2015  Arun Reddy Nelakurthi
  *
@@ -19,16 +19,16 @@
  * Report bugs or new features to: arunreddy@asu.edu
  */
 
-package ml.arunreddy.sentimentanalysis.api;
+package ml.arunreddy.research.sentiment.impl;
 
-import net.didion.jwnl.data.Exc;
+import ml.arunreddy.research.sentiment.SentimentAnalyzer;
+import ml.arunreddy.research.sentiment.SentimentLabel;
 
 /**
- * Created by arun on 6/22/15.
+ * Created by arun on 6/26/15.
  */
-public class MainClass {
+public  abstract class AbstractSentimentAnalyzer implements SentimentAnalyzer{
 
-  public static void main(String[] args) throws Exception{
-    System.out.println(NLTKApi.getSentiment("great"));
-  }
+  @Override
+  public abstract SentimentLabel getSentiment(String text);
 }

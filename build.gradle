@@ -3,14 +3,51 @@ apply plugin: 'java'
 sourceCompatibility = 1.8
 version = '1.0'
 
-repositories {
-    mavenCentral()
+buildscript {
+    repositories {
+        maven {
+            url 'http://draenor:8081/artifactory/plugins-release'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+
+        maven { url 'http://draenor:8081/artifactory/libs-snapshot-local'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+    }
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.0.3"
+    }
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
 }
 
-plugins {
-    id "com.jfrog.bintray" version "1.1"
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'libs-release-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+    }
 }
