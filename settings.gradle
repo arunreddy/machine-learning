@@ -1,4 +1,4 @@
 rootProject.name = 'machine-learning'
 
+include 'ml-datasets'
 include 'ml-sentiment-analysis'
-

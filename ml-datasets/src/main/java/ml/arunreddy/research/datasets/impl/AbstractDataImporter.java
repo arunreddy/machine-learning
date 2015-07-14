@@ -17,6 +17,7 @@ import com.ohmdb.api.Db;
 import com.ohmdb.api.Ohm;
 import com.ohmdb.api.Table;
 
+import ml.arunreddy.research.datasets.DataSets;
 import ml.arunreddy.research.datasets.adt.Sentiment;
 
 /**
@@ -36,12 +37,21 @@ public abstract class AbstractDataImporter
      */
     public AbstractDataImporter(String dbName)
     {
-        this.db = Ohm.db(dbName);
+        this(dbName,false);
     }
 
+    public AbstractDataImporter(String dbName, boolean clearDatabase){
+        System.out.println(DataSets.ROOT_DIRECTORY);
+        String dbFilePath = DataSets.ROOT_DIRECTORY+"ohmdb/"+dbName;
+        File file = new File(dbFilePath);
+        if(clearDatabase && file.exists()){
+            file.delete();
+        }
+        this.db = Ohm.db(dbFilePath);
+    }
+    
     protected BufferedReader getBufferedReader(File file, boolean gzip)
     {
-
         BufferedReader reader = null;
         try {
             InputStream inputStream = new FileInputStream(file);
@@ -71,15 +81,27 @@ public abstract class AbstractDataImporter
     }
 
     /**
-     * Finalize Class - Shutdown the DB after its use.
+     * Finalize method executed by the garbage collector.
      * 
      * @throws Throwable
      */
     protected void finalize() throws Throwable
+    {
+        this.cleanUp();
+    }
+    
+    /**
+     * Clean up the importer.
+     * <ul>
+     *  <li> Shutdown the DB after its use.</li>
+     *  </ul>
+     */
+    protected void cleanUp()
     {
         if (db != null) {
             logger.debug("Shutting down the database.");
             db.shutdown();
         }
     }
+    
 }

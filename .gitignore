@@ -104,6 +104,8 @@ local.properties
 
 *.dataset
 *.dat
+*.csv
+*.txt
 
 
 dataStore/

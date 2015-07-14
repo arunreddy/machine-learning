@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2015 Arun Reddy Nelakurthi
 * 
 * This file is part of ml-datasets.
@@ -16,26 +17,24 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ml.arunreddy.research.datasets.moviereviews;
-
-import ml.arunreddy.research.datasets.impl.AbstractDataImporter;
+package ml.arunreddy.research.datasets;
 
 /**
+ * 
  * @version $Id$
  */
-public class MovieReviewsDataImporter extends AbstractDataImporter
+public class OhmDBReader
 {
 
+    private String dataSetDbPath;
+    
     /**
-     * @param dbName
+     * 
      */
-    public MovieReviewsDataImporter(String dbName)
+    public OhmDBReader(String dataSetDbPath)
     {
-        super(dbName);
-        // TODO Auto-generated constructor stub
+       this.dataSetDbPath = dataSetDbPath;
     }
-    
-    
-    
 
+    
 }

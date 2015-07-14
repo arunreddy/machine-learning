@@ -16,26 +16,22 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ml.arunreddy.research.datasets.moviereviews;
-
-import ml.arunreddy.research.datasets.impl.AbstractDataImporter;
+package ml.arunreddy.research.datasets;
 
 /**
+ * References to various machine learning and NLP datasets.
  * @version $Id$
  */
-public class MovieReviewsDataImporter extends AbstractDataImporter
+public interface DataSets
 {
 
-    /**
-     * @param dbName
-     */
-    public MovieReviewsDataImporter(String dbName)
-    {
-        super(dbName);
-        // TODO Auto-generated constructor stub
-    }
+    public static final String SEMEVAL_TWITTER_2013_TRAIN = "semeval/Devdata-SemEval2013.txt.gz";
     
+    public static final String SEMEVAL_TWITTER_2013_TEST = "semeval/Testdata-SemEval2013.txt.gz";
     
+    public static final String SEMEVAL_TWITTER_2013_VALIDATION = "semeval/Trainingsdata-SemEval2013.txt.gz";
     
-
+    public static final String ROOT_DIRECTORY = System.getenv("DATASETS");
+    
+    public static final String TU_DIABETES = "tu-diabetes/tu-diabetes.txt.gz";
 }

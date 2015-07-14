@@ -16,26 +16,46 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package ml.arunreddy.research.datasets.moviereviews;
+package ml.arunreddy.research.datasets.utils;
 
-import ml.arunreddy.research.datasets.impl.AbstractDataImporter;
+import java.io.File;
+import java.io.InputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ml.arunreddy.research.datasets.DataSets;
 
 /**
  * @version $Id$
  */
-public class MovieReviewsDataImporter extends AbstractDataImporter
+public class DataSetFileReader
 {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataSetFileReader.class);
+
     /**
-     * @param dbName
+     * 
      */
-    public MovieReviewsDataImporter(String dbName)
+    public DataSetFileReader()
     {
-        super(dbName);
         // TODO Auto-generated constructor stub
     }
-    
-    
-    
+
+    public static InputStream readGZippedFile()
+    {
+
+        return null;
+    }
+
+    public static File getFile(String relativePathToFile)
+    {
+        File file = new File(DataSets.ROOT_DIRECTORY + relativePathToFile);
+        if (file.exists()) {
+            return file;
+        }
+        logger.error("File {} is missing.", file);
+        return null;
+    }
 
 }

@@ -10,8 +10,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ml.arunreddy.research.datasets.DataSets;
 import ml.arunreddy.research.datasets.adt.Sentiment;
 import ml.arunreddy.research.datasets.impl.AbstractDataImporter;
+import ml.arunreddy.research.datasets.utils.DataSetFileReader;
 
 /**
  * Data importer for Sem Eval twitter data for sentiment analysis.
@@ -30,7 +32,7 @@ public class SemEvalTwitterDataImporter extends AbstractDataImporter
      */
     public SemEvalTwitterDataImporter(String dbName)
     {
-        super(dbName);
+        super(dbName,true);
     }
 
     /**
@@ -40,12 +42,11 @@ public class SemEvalTwitterDataImporter extends AbstractDataImporter
      * @param filePath
      * @param instanceType
      */
-    public List<Sentiment> readSentimentData(String filePath, int instanceType)
+    public List<Sentiment> readSentimentData(File file, int instanceType)
     {
 
         List<Sentiment> sentimentList = new ArrayList<Sentiment>();
-        File file = new File(filePath);
-        BufferedReader reader = getBufferedReader(file, filePath.endsWith("gz") ? true : false);
+        BufferedReader reader = getBufferedReader(file, file.getName().endsWith("gz") ? true : false);
         if (reader != null) {
             try {
                 while (reader.ready()) {
@@ -58,7 +59,7 @@ public class SemEvalTwitterDataImporter extends AbstractDataImporter
 
                 }
             } catch (IOException e) {
-                logger.error("Error reading the given file {}.", filePath);
+                logger.error("Error reading the given file {}.", file.getName());
                 e.printStackTrace();
             }
         }
@@ -67,34 +68,30 @@ public class SemEvalTwitterDataImporter extends AbstractDataImporter
 
     public static void main(String[] args) throws Exception
     {
-
+        
         // 2013 Database.
         SemEvalTwitterDataImporter semEvalTwitterDataImporter =
             new SemEvalTwitterDataImporter(SEMEVAL_TWITTER_2013_DB_NAME);
-
+        
         // Training Data.
-        URL trainingFileUrl = SemEvalTwitterDataImporter.class.getClassLoader()
-            .getResource("semeval/2013/Trainingsdata-SemEval2013.txt.gz");
         List<Sentiment> sentimentList =
-            semEvalTwitterDataImporter.readSentimentData(trainingFileUrl.getFile(), Sentiment.TRAIN_INSTANCE);
+            semEvalTwitterDataImporter.readSentimentData(DataSetFileReader.getFile(DataSets.SEMEVAL_TWITTER_2013_TRAIN), Sentiment.TRAIN_INSTANCE);
         semEvalTwitterDataImporter.writeSentimentListToDb(sentimentList);
 
         // Test Data.
-        URL testFileUrl =
-            SemEvalTwitterDataImporter.class.getClassLoader().getResource("semeval/2013/Testdata-SemEval2013.txt.gz");
-        sentimentList = semEvalTwitterDataImporter.readSentimentData(testFileUrl.getFile(), Sentiment.TEST_INSTANCE);
+        sentimentList = semEvalTwitterDataImporter.readSentimentData(DataSetFileReader.getFile(DataSets.SEMEVAL_TWITTER_2013_TEST), Sentiment.TEST_INSTANCE);
         semEvalTwitterDataImporter.writeSentimentListToDb(sentimentList);
 
         // Validation Data.
-        URL validationFileUrl =
-            SemEvalTwitterDataImporter.class.getClassLoader().getResource("semeval/2013/Devdata-SemEval2013.txt.gz");
-        sentimentList =
-            semEvalTwitterDataImporter.readSentimentData(validationFileUrl.getFile(), Sentiment.VALIDATION_INSTANCE);
+        sentimentList = semEvalTwitterDataImporter.readSentimentData(DataSetFileReader.getFile(DataSets.SEMEVAL_TWITTER_2013_VALIDATION), Sentiment.VALIDATION_INSTANCE);
         semEvalTwitterDataImporter.writeSentimentListToDb(sentimentList);
 
+        
+        semEvalTwitterDataImporter.cleanUp();
         // 2014 Database.
 
         // 2015 Database.
 
     }
+
 }
