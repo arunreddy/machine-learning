@@ -29,6 +29,5 @@ import ml.arunreddy.research.sentiment.SentimentLabel;
  */
 public  abstract class AbstractSentimentAnalyzer implements SentimentAnalyzer{
 
-  @Override
   public abstract SentimentLabel getSentiment(String text);
 }
