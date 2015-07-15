@@ -23,51 +23,56 @@ import org.la4j.Vector;
 import org.la4j.matrix.sparse.CCSMatrix;
 
 /**
+ * This class contains various matrix utility methods build on top of la4j {@link http://la4j.org/} library.
  * 
  * @version $Id$
- * 
  */
 public class MatrixUtils
 {
 
     /**
-     * Returns the degree matrix (row sum of given matrices returned as a diagonal matrix). Used for Laplacian Normalization.
+     * Returns the degree matrix (row sum of given matrices returned as a diagonal matrix). Used for Laplacian
+     * Normalization.
+     * 
      * @param matrixArray
      * @return
      * @throws MathUtilsException
      */
-    public Matrix calculateDegreeMatrix(Matrix... matrixArray) throws MathUtilsException{
+    public static Matrix calculateDegreeMatrix(Matrix... matrixArray) throws MathUtilsException
+    {
 
-        if(matrixArray.length < 1){
+        if (matrixArray.length < 1) {
             throw new MathUtilsException("Array is empty..!!");
         }
         int degreeMatrixRowCount = matrixArray[0].rows();
-        Matrix degreeMatrix = new CCSMatrix(degreeMatrixRowCount,degreeMatrixRowCount);
+        Matrix degreeMatrix = new CCSMatrix(degreeMatrixRowCount, degreeMatrixRowCount);
         for (int i = 0; i < matrixArray.length; i++) {
             Matrix matrix = matrixArray[i];
-            //Check if the number of rows of the matrix equals degree matrix row count.
-            if(degreeMatrixRowCount!=matrix.rows()){
-                throw new MathUtilsException("Rows of the degree matrix doesn't match with matrix-#("+i+") in the given argument.");
+            // Check if the number of rows of the matrix equals degree matrix row count.
+            if (degreeMatrixRowCount != matrix.rows()) {
+                throw new MathUtilsException(
+                    "Rows of the degree matrix doesn't match with matrix-#(" + i + ") in the given argument.");
             }
             for (int j = 0; j < degreeMatrixRowCount; j++) {
                 Vector rowVector = matrix.getRow(j);
-                double currentValue = degreeMatrix.get(j,j);
-                degreeMatrix.set(j, j, rowVector.sum()+currentValue);
+                double currentValue = degreeMatrix.get(j, j);
+                degreeMatrix.set(j, j, rowVector.sum() + currentValue);
             }
         }
-        
+
         return degreeMatrix;
     }
-    
+
     /**
-     * Calculate Laplacian Normal Matrix.
+     * Calculate the Laplacian Normal Matrix from the given adjacency and degree matrices.
      * 
      * @param degreeMatrixA
      * @param adjacencyMatrix
      * @param degreeMatrixB
      * @return
      */
-    public Matrix calculateLaplacianNorm(Matrix degreeMatrixA, Matrix adjacencyMatrix, Matrix degreeMatrixB){
+    public static Matrix calculateLaplacianNorm(Matrix degreeMatrixA, Matrix adjacencyMatrix, Matrix degreeMatrixB)
+    {
         return degreeMatrixA.multiply(adjacencyMatrix).multiply(degreeMatrixB);
     }
 

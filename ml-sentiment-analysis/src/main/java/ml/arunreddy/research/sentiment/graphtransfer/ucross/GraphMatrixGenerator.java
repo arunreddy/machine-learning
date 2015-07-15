@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.linear.OpenMapRealMatrix;
 import org.apache.commons.math3.stat.descriptive.summary.Sum;
 import org.la4j.Matrix;
+import org.la4j.Vector;
 import org.la4j.matrix.sparse.CCSMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class GraphMatrixGenerator
         InstanceList instanceList = InstanceList.load(instancesFile);
 
         logger.info("Total number of instances loaded {}.", instanceList.size());
-        logger.info("Size of the vocabulary {}",instanceList.getAlphabet().size());
+        logger.info("Size of the vocabulary {}", instanceList.getAlphabet().size());
 
         // Create lists for source and target, positive and negative instances.
         InstanceList sourcePositiveInstanceList = instanceList.cloneEmpty();
@@ -112,13 +112,12 @@ public class GraphMatrixGenerator
         int targetInstanceCount = targetPositiveInstanceList.size() + targetNegativeInstanceList.size();
         int totalPosts = sourceInstanceCount + targetInstanceCount;
         int vocabularySize = sourcePositiveInstanceList.getAlphabet().size();
-        System.out.println(vocabularySize);
 
-        OpenMapRealMatrix adjMatrixUsersPosts = new OpenMapRealMatrix(totalUsers, totalPosts);
-        OpenMapRealMatrix adjMatrixPostsVocabularyBinary = new OpenMapRealMatrix(totalPosts, vocabularySize);
-        OpenMapRealMatrix adjMatrixPostsVocabularyCount = new OpenMapRealMatrix(totalPosts, vocabularySize);
+        Matrix adjMatrixUsersPosts = new CCSMatrix(totalUsers, totalPosts);
+        Matrix adjMatrixPostsVocabularyBinary = new CCSMatrix(totalPosts, vocabularySize);
+        Matrix adjMatrixPostsVocabularyCount = new CCSMatrix(totalPosts, vocabularySize);
 
-        OpenMapRealMatrix labelMatrix = new OpenMapRealMatrix(totalPosts, 1);
+        Matrix labelMatrix = new CCSMatrix(totalPosts, 1);
 
         InstanceList combinedInstances = sourcePositiveInstanceList.cloneEmpty();
         combinedInstances.addAll(sourceNegativeInstanceList);
@@ -139,13 +138,13 @@ public class GraphMatrixGenerator
             if (userIndex == -1) {
                 System.out.println(instanceName);
             } else {
-                adjMatrixUsersPosts.setEntry(userIndex, i, 1.0);
+                adjMatrixUsersPosts.set(userIndex, i, 1.0);
             }
 
             if (instanceName.startsWith("AH_POS") || instanceName.startsWith("DB_POS")) {
-                labelMatrix.setEntry(i, 0, 1);
+                labelMatrix.set(i, 0, 1);
             } else if (instanceName.startsWith("AH_NEG") || instanceName.startsWith("DB_NEG")) {
-                labelMatrix.setEntry(i, 0, 0);
+                labelMatrix.set(i, 0, 0);
             }
 
         }
@@ -159,12 +158,14 @@ public class GraphMatrixGenerator
             for (int j = 0; j < values.length; j++) {
                 double value = values[j];
                 int index = indices[j];
-                adjMatrixPostsVocabularyBinary.setEntry(i, index, 1.0);
-                adjMatrixPostsVocabularyCount.setEntry(i, index, value);
+                adjMatrixPostsVocabularyBinary.set(i, index, 1.0);
+                adjMatrixPostsVocabularyCount.set(i, index, value);
             }
 
         }
 
+        logger.info("Adjacency Matrix computation completed");
+        
         /**
          * %% Initialize the matrices.
          * 
@@ -246,40 +247,44 @@ public class GraphMatrixGenerator
          */
 
         // Calculate the degree matrix.
-        Matrix degreeMatrix_one = new CCSMatrix(totalUsers,totalUsers);
-        Matrix degreeMatrix_two = new CCSMatrix(totalPosts,totalPosts);
-        Matrix degreeMatrix_three = new CCSMatrix(vocabularySize,vocabularySize);
-        
-        
-        //User Degree Matrix.
+        Matrix degreeMatrix_one = new CCSMatrix(totalUsers, totalUsers);
+        Matrix degreeMatrix_two = new CCSMatrix(totalPosts, totalPosts);
+        Matrix degreeMatrix_three = new CCSMatrix(vocabularySize, vocabularySize);
+
+        // User Degree Matrix.
         for (int j = 0; j < totalUsers; j++) {
-            double[] row = adjMatrixUsersPosts.getRow(j);
-            double value =  new Sum().evaluate(row);
-            value = Math.sqrt(1.0/value);
-            degreeMatrix_one.setEntry(j, j,value);
+            Vector row = adjMatrixUsersPosts.getRow(j);
+            double value = row.sum();
+            value = Math.sqrt(1.0 / value);
+            degreeMatrix_one.set(j, j, value);
         }
-        
-        //Posts Degree Matrix.
+
+        // Posts Degree Matrix.
         for (int j = 0; j < totalPosts; j++) {
-            double[] userPosts = adjMatrixUsersPosts.getColumn(j);
-            double[] featurePosts = adjMatrixPostsVocabularyBinary.getRow(j);
-            double value = new Sum().evaluate(userPosts)+new Sum().evaluate(featurePosts);
-            value = Math.sqrt(1.0/value);
-            degreeMatrix_two.setEntry(j, j, value);
+            Vector userPosts = adjMatrixUsersPosts.getColumn(j);
+            Vector featurePosts = adjMatrixPostsVocabularyBinary.getRow(j);
+            double value = userPosts.sum() + featurePosts.sum();
+            value = Math.sqrt(1.0 / value);
+            degreeMatrix_two.set(j, j, value);
         }
-        
-        //Feature Degree Matrix.
+
+        // Feature Degree Matrix.
         for (int j = 0; j < vocabularySize; j++) {
-            double[] featurePosts = adjMatrixPostsVocabularyBinary.getColumn(j);
-            double value = new Sum().evaluate(featurePosts);
-            value = Math.sqrt(1.0/value);
-            degreeMatrix_three.setEntry(j, j,value );
+            Vector featurePosts = adjMatrixPostsVocabularyBinary.getColumn(j);
+            double value = featurePosts.sum();
+            value = Math.sqrt(1.0 / value);
+            degreeMatrix_three.set(j, j, value);
         }
-        
+
+        logger.info("Degree Matrix computation completed");
 
         // Normalized laplacian matrix.
-        OpenMapRealMatrix sNormUserPosts = degreeMatrix_one.multiply(adjMatrixUsersPosts).multiply(degreeMatrix_two);
-        OpenMapRealMatrix sNormPostsFeatures = degreeMatrix_two.multiply(adjMatrixUsersPosts).multiply(degreeMatrix_three);
+        Matrix sNormUserPosts = degreeMatrix_one.multiply(adjMatrixUsersPosts).multiply(degreeMatrix_two);
+        Matrix sNormPostsFeatures = degreeMatrix_two.multiply(adjMatrixPostsVocabularyBinary).multiply(degreeMatrix_three);
+        logger.info("Normalized Laplace Matrix computation completed");
+
+        
+        //Split the matrices into source and target.
         
         logger.info("Execution Complete...");
     }
