@@ -1,10 +1,20 @@
-apply plugin: 'java'
-apply plugin : 'eclipse'
-
-sourceCompatibility = 1.8
-version = '1.0'
+allprojects {
+    apply plugin: 'java'
+    apply plugin : 'eclipse'
+    group = 'ml.arunreddy.research'
+    sourceCompatibility = 1.8
+    version = '1.0'
+    
+    apply plugin: "com.jfrog.artifactory"
+    apply plugin: 'findbugs'
+}
 
 buildscript {
+    dependencies {
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.0.3"
+    }
+    
     repositories {
         maven {
             url 'http://draenor:8081/artifactory/plugins-release'
@@ -21,15 +31,8 @@ buildscript {
             }
         }
     }
-    dependencies {
-        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.0.3"
-    }
 }
 
-allprojects {
-    apply plugin: "com.jfrog.artifactory"
-}
 
 artifactory {
     contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver

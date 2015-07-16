@@ -1,21 +1,4 @@
-apply plugin: 'java'
-apply plugin : 'eclipse'
 
-sourceCompatibility = 1.5
-version = '1.0'
-
-repositories {
-    mavenCentral()
-    maven {
-        url  "http://dl.bintray.com/arunreddy/maven"
-    }
-    maven { url 'http://draenor:8081/artifactory/libs-snapshot-local'
-        credentials {
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-        }
-    }
-}
 dependencies {
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
     compile 'org.la4j:la4j:0.5.5'
