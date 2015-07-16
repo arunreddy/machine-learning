@@ -84,6 +84,9 @@ public class UCrossClassifier
         this.normPostsAndFeaturesMatrix = normPostsAndFeaturesMatrix;
         this.normUsersAndPostsMatrix = normUsersAndPostsMatrix;
         logger.debug("Laplacian Normalization of matrices is complete.");
+        
+        logger.debug("Users and Posts Matrix dimensions: {}x{}",normUsersAndPostsMatrix.rows(), normUsersAndPostsMatrix.columns());
+        logger.debug("Posts and Features Matrix dimensions: {}x{}", normPostsAndFeaturesMatrix.rows(), normPostsAndFeaturesMatrix.columns());
 
     }
 
@@ -111,10 +114,10 @@ public class UCrossClassifier
             sourceDomainPostsIndices[i] = i + totalUsers;
 
         for (int i = 0; i < targetDomainPosts; i++)
-            sourceDomainPostsIndices[i] = i + totalUsers + sourceDomainPosts;
+            targetDomainPostsIndices[i] = i + totalUsers + sourceDomainPosts;
 
         for (int i = 0; i < totalFeatures; i++)
-            sourceDomainPostsIndices[i] = i + totalUsers + sourceDomainPosts + targetDomainPosts;
+            featureIndices[i] = i + totalUsers + sourceDomainPosts + targetDomainPosts;
 
         Matrix s12 = this.normUsersAndPostsMatrix.select(userIndices, sourceDomainPostsIndices);
         Matrix s13 = this.normUsersAndPostsMatrix.select(userIndices, targetDomainPostsIndices);

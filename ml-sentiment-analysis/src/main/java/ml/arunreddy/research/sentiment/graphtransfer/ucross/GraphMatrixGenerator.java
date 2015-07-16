@@ -53,13 +53,11 @@ public class GraphMatrixGenerator
 
     public static void main(String[] args)
     {
-        System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
-
         File instancesFile = new File("/home/arun/media/datasets/mallet/amazon-health-db-sisters.instances");
         InstanceList instanceList = InstanceList.load(instancesFile);
 
-        logger.info("Total number of instances loaded {}.", instanceList.size());
-        logger.info("Size of the vocabulary {}", instanceList.getAlphabet().size());
+        logger.debug("Total number of instances loaded {}.", instanceList.size());
+        logger.debug("Size of the vocabulary {}", instanceList.getAlphabet().size());
 
         // Create lists for source and target, positive and negative instances.
         InstanceList sourcePositiveInstanceList = instanceList.cloneEmpty();
@@ -149,6 +147,8 @@ public class GraphMatrixGenerator
 
         }
 
+        Matrix postsAndLabelsMatrix = new CCSMatrix(totalPosts,1);
+        
         for (int i = 0; i < totalPosts; i++) {
             Instance instance = combinedInstances.get(i);
             FeatureVector instanceFeatureVector = (FeatureVector) instance.getData();
@@ -166,126 +166,8 @@ public class GraphMatrixGenerator
 
         logger.info("Adjacency Matrix computation completed");
         
-        /**
-         * %% Initialize the matrices.
-         * 
-         * <pre>
-        users = [users_S users_T];
-        A_12 = users(:,1:num_S+num_target);
-        A_13 = users(:,num_S+num_target+1:num_Total);
-        
-        data = [data_S' data_T']';
-        A_24 = data(1:num_S+num_target,:);Damn... we know whats going on !! What say Vissu Potluri.
-        A_34 = data(num_S+num_target+1:num_Total,:);
-        
-        labels = [labels_S' labels_T']';
-        Y2 = labels(1:num_S+num_target,:);
-        Y3_TRUTH = labels(num_S+num_target+1:num_Total,:);
-        
-        % Calculate the degree matrix.
-        D_11 = full(sum(A_12,2)+sum(A_13,2));
-        D_22 = full(sum(A_12',2)+sum(A_24,2));
-        D_33 = full(sum(A_13',2)+sum(A_34,2));
-        D_44 = full(sum(A_24',2)+sum(A_34',2));
-        
-        % Calculate the sqrt of degree matrix.
-        D_11 = sqrt(1./D_11);
-        D_22 = sqrt(1./D_22);
-        D_33 = sqrt(1./D_33);
-        D_44 = sqrt(1./D_44);
-        
-        % To sparse matrix.
-        D_11 = sparse(diag(D_11));
-        D_22 = sparse(diag(D_22));
-        D_33 = sparse(diag(D_33));
-        
-        D_44_SPARSE = speye(size(D_44,1));
-        for m = 1:size(D_44,1)
-        D_44_SPARSE(m,m) = D_44(m,1); 
-        end
-        D_44 = D_44_SPARSE;
-        
-        %% Normalized Laplacian matrices.
-        S_12 = D_11 * A_12 * D_22;
-        S_13 = D_11 * A_13 * D_33;
-        S_24 = D_22 * A_24 * D_44;
-        S_34 = D_33 * A_34 * D_44;
-        
-        F3 = zeros(size(S_34,1),1);
-        
-        Y1 = zeros(size(S_12,1),1);
-        Y3 = zeros(size(S_34,1),1);
-        Y4 = zeros(size(S_34,2),1);
-        
-        %% Assumptions/ Set up
-        F3_PREV = F3;
-        %% TRITER Algorithm.
-        for i = 1:iterations
-        
-        % F1.
-        F1 = (var_alpha)*(S_12*Y2 + S_13*F3_PREV) + ((1-var_alpha)*Y1);
-        
-        % F4
-        F4 = (var_alpha)*(S_24'*Y2 + S_34'*F3_PREV) + ((1-var_alpha)*Y4);
-        
-        % F3
-        F3_CURR = (var_alpha)*(S_13'*F1 + S_34*F4) + ((1-var_alpha)*Y3);
-        
-        F3_PREV = F3_CURR;
-        end
-        
-        
-        %% Test Algorithm.
-        test_err=0;
-        no_of_test = size(Y3_TRUTH,1);
-        for i = 1:no_of_test
-        if F3_CURR(i,1)*Y3_TRUTH(i,1) <= 0
-        test_err = test_err+ 1/no_of_test; 
-        end
-        end
-         * </pre>
-         */
-
-        // Calculate the degree matrix.
-        Matrix degreeMatrix_one = new CCSMatrix(totalUsers, totalUsers);
-        Matrix degreeMatrix_two = new CCSMatrix(totalPosts, totalPosts);
-        Matrix degreeMatrix_three = new CCSMatrix(vocabularySize, vocabularySize);
-
-        // User Degree Matrix.
-        for (int j = 0; j < totalUsers; j++) {
-            Vector row = adjMatrixUsersPosts.getRow(j);
-            double value = row.sum();
-            value = Math.sqrt(1.0 / value);
-            degreeMatrix_one.set(j, j, value);
-        }
-
-        // Posts Degree Matrix.
-        for (int j = 0; j < totalPosts; j++) {
-            Vector userPosts = adjMatrixUsersPosts.getColumn(j);
-            Vector featurePosts = adjMatrixPostsVocabularyBinary.getRow(j);
-            double value = userPosts.sum() + featurePosts.sum();
-            value = Math.sqrt(1.0 / value);
-            degreeMatrix_two.set(j, j, value);
-        }
-
-        // Feature Degree Matrix.
-        for (int j = 0; j < vocabularySize; j++) {
-            Vector featurePosts = adjMatrixPostsVocabularyBinary.getColumn(j);
-            double value = featurePosts.sum();
-            value = Math.sqrt(1.0 / value);
-            degreeMatrix_three.set(j, j, value);
-        }
-
-        logger.info("Degree Matrix computation completed");
-
-        // Normalized laplacian matrix.
-        Matrix sNormUserPosts = degreeMatrix_one.multiply(adjMatrixUsersPosts).multiply(degreeMatrix_two);
-        Matrix sNormPostsFeatures = degreeMatrix_two.multiply(adjMatrixPostsVocabularyBinary).multiply(degreeMatrix_three);
-        logger.info("Normalized Laplace Matrix computation completed");
-
-        
-        //Split the matrices into source and target.
-        
+        UCrossClassifier uCrossClassifier = new UCrossClassifier(adjMatrixUsersPosts, adjMatrixPostsVocabularyBinary, postsAndLabelsMatrix, sourceInstanceCount);
+       // uCrossClassifier.classify(100, 2, 0.90);
         logger.info("Execution Complete...");
     }
 
