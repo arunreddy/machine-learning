@@ -20,29 +20,50 @@ package ml.arunreddy.research.sentiment.graphtransfer.ucross;
 
 import org.la4j.Matrix;
 
-
 /**
- * 
  * @version $Id$
  */
 public class UCrossData
 {
-    
-    private final Matrix A_12;
-    private final Matrix A_13;
-    private final Matrix A_24;
-    private final Matrix A_34;
+
+    private final Matrix usersAndPostsMatrix;
+
+    private final Matrix postsAndFeaturesMatrix;
+
+    private final Matrix postsAndLabelsMatrix;
 
     /**
      * 
      */
-    public UCrossData(Matrix A_12, Matrix A_13, Matrix A_24, Matrix A_34)
+    public UCrossData(Matrix usersAndPostsMatrix, Matrix postsAndFeaturesMatrix, Matrix postsAndLabelsMatrix)
     {
-        //Initialize the matrices.
-        this.A_12 = A_12;
-        this.A_13 = A_13;
-        this.A_24 = A_24;
-        this.A_34 = A_34;
+        this.usersAndPostsMatrix = usersAndPostsMatrix;
+        this.postsAndFeaturesMatrix = postsAndFeaturesMatrix;
+        this.postsAndLabelsMatrix = postsAndLabelsMatrix;
+    }
+
+    /**
+     * @return the usersAndPostsMatrix
+     */
+    public Matrix getUsersAndPostsMatrix()
+    {
+        return usersAndPostsMatrix;
+    }
+
+    /**
+     * @return the postsAndFeaturesMatrix
+     */
+    public Matrix getPostsAndFeaturesMatrix()
+    {
+        return postsAndFeaturesMatrix;
+    }
+
+    /**
+     * @return the postsAndLabelsMatrix
+     */
+    public Matrix getPostsAndLabelsMatrix()
+    {
+        return postsAndLabelsMatrix;
     }
 
 }

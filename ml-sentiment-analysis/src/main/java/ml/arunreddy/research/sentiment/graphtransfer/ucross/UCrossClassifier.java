@@ -40,9 +40,9 @@ public class UCrossClassifier
 
     private final Matrix normPostsAndFeaturesMatrix;
 
-    private final Matrix postsAndLabelsMatrix;
-
     private final int numOfSourceDomainPosts;
+
+    private final UCrossData uCrossData;
 
     private static final Logger logger = LoggerFactory.getLogger(UCrossClassifier.class);
 
@@ -54,11 +54,10 @@ public class UCrossClassifier
      * @param Y_S {@See Matrix} of source domain labels.
      * @param Y_T {@See Matrix} of target domain labels.
      */
-    public UCrossClassifier(Matrix usersAndPostsMatrix, Matrix postsAndFeaturesMatrix, Matrix postsAndLabelsMatrix,
-        int numOfSourceDomainPosts)
+    public UCrossClassifier(UCrossData uCrossData, int numOfSourceDomainPosts)
     {
         // Initialize the matrices.
-        this.postsAndLabelsMatrix = postsAndLabelsMatrix;
+        this.uCrossData = uCrossData;
         this.numOfSourceDomainPosts = numOfSourceDomainPosts;
         logger.debug("UCrossClassifier instantiated.");
 
@@ -67,15 +66,20 @@ public class UCrossClassifier
 
         // Degree matrices and normalized laplacian matrices.
         try {
-            Matrix degreeMatrix_one = MatrixUtils.calculateDegreeMatrix(usersAndPostsMatrix);
-            Matrix degreeMatrix_two =
-                MatrixUtils.calculateDegreeMatrix(postsAndFeaturesMatrix, usersAndPostsMatrix.transpose());
-            Matrix degreeMatrix_three = MatrixUtils.calculateDegreeMatrix(postsAndFeaturesMatrix.transpose());
+            Matrix degreeMatrix_one = MatrixUtils.calculateDegreeMatrix(uCrossData.getUsersAndPostsMatrix());
+            Matrix degreeMatrix_two = MatrixUtils.calculateDegreeMatrix(uCrossData.getPostsAndFeaturesMatrix(),
+                uCrossData.getUsersAndPostsMatrix().transpose());
+            Matrix degreeMatrix_three =
+                MatrixUtils.calculateDegreeMatrix(uCrossData.getPostsAndFeaturesMatrix().transpose());
 
-            normUsersAndPostsMatrix =
-                MatrixUtils.calculateLaplacianNorm(degreeMatrix_one, usersAndPostsMatrix, degreeMatrix_two);
-            normPostsAndFeaturesMatrix =
-                MatrixUtils.calculateLaplacianNorm(degreeMatrix_two, postsAndFeaturesMatrix, degreeMatrix_three);
+            normUsersAndPostsMatrix = MatrixUtils.calculateLaplacianNorm(degreeMatrix_one,
+                uCrossData.getUsersAndPostsMatrix(), degreeMatrix_two);
+            normPostsAndFeaturesMatrix = MatrixUtils.calculateLaplacianNorm(degreeMatrix_two,
+                uCrossData.getPostsAndFeaturesMatrix(), degreeMatrix_three);
+            logger.debug("Users and Posts Matrix dimensions: {}x{}", normUsersAndPostsMatrix.rows(),
+                normUsersAndPostsMatrix.columns());
+            logger.debug("Posts and Features Matrix dimensions: {}x{}", normPostsAndFeaturesMatrix.rows(),
+                normPostsAndFeaturesMatrix.columns());
 
         } catch (MathUtilsException ex) {
             logger.error("MathUtilsException: {}", ex.getMessage());
@@ -84,9 +88,6 @@ public class UCrossClassifier
         this.normPostsAndFeaturesMatrix = normPostsAndFeaturesMatrix;
         this.normUsersAndPostsMatrix = normUsersAndPostsMatrix;
         logger.debug("Laplacian Normalization of matrices is complete.");
-        
-        logger.debug("Users and Posts Matrix dimensions: {}x{}",normUsersAndPostsMatrix.rows(), normUsersAndPostsMatrix.columns());
-        logger.debug("Posts and Features Matrix dimensions: {}x{}", normPostsAndFeaturesMatrix.rows(), normPostsAndFeaturesMatrix.columns());
 
     }
 
@@ -125,8 +126,8 @@ public class UCrossClassifier
         Matrix s34 = this.normPostsAndFeaturesMatrix.select(targetDomainPostsIndices, featureIndices);
 
         Matrix yU = new CCSMatrix(totalUsers, 1);
-        Matrix yS = this.postsAndLabelsMatrix.sliceTopLeft(sourceDomainPosts, 1);
-        Matrix yT_Truth = this.postsAndLabelsMatrix.sliceBottomRight(sourceDomainPosts, 1);
+        Matrix yS = this.uCrossData.getPostsAndLabelsMatrix().sliceTopLeft(sourceDomainPosts, 1);
+        Matrix yT_Truth = this.uCrossData.getPostsAndLabelsMatrix().sliceBottomRight(sourceDomainPosts, 1);
         Matrix yT = new CCSMatrix(targetDomainPosts, 1);
         Matrix yF = new CCSMatrix(totalFeatures, 1);
 
@@ -153,14 +154,6 @@ public class UCrossClassifier
         double errorRate = (double) error / (double) targetDomainPosts;
 
         return errorRate;
-    }
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) throws Exception
-    {
-
     }
 
 }

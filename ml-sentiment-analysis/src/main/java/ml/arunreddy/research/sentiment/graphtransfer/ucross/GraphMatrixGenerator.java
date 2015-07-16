@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import cc.mallet.types.FeatureVector;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
+import ml.arunreddy.research.sentiment.SentimentClassifierException;
 
 /**
  * @version $Id$
@@ -43,22 +44,17 @@ public class GraphMatrixGenerator
 
     private static final Logger logger = LoggerFactory.getLogger(GraphMatrixGenerator.class);
 
-    /**
-     * 
-     */
-    public GraphMatrixGenerator()
+    public UCrossData generateAdjacencyMatrixFromMalletInstances(File malletInstancesFile)
+        throws SentimentClassifierException
     {
-
-    }
-
-    public static void main(String[] args)
-    {
-        File instancesFile = new File("/home/arun/media/datasets/mallet/amazon-health-db-sisters.instances");
-        InstanceList instanceList = InstanceList.load(instancesFile);
-
+        if(!malletInstancesFile.exists()){
+            throw new SentimentClassifierException("Given instances file not found.!");
+        }
+        
+        InstanceList instanceList = InstanceList.load(malletInstancesFile);
         logger.debug("Total number of instances loaded {}.", instanceList.size());
         logger.debug("Size of the vocabulary {}", instanceList.getAlphabet().size());
-
+        
         // Create lists for source and target, positive and negative instances.
         InstanceList sourcePositiveInstanceList = instanceList.cloneEmpty();
         InstanceList sourceNegativeInstanceList = instanceList.cloneEmpty();
@@ -82,7 +78,7 @@ public class GraphMatrixGenerator
         logger.info("Segregation of instances into 4 categories completed..");
         logger.info("SRC_POS:{}  SRC_NEG:{}  TGT_POS:{}  TGT_NEG:{}", sourcePositiveInstanceList.size(),
             sourceNegativeInstanceList.size(), targetPositiveInstanceList.size(), targetNegativeInstanceList.size());
-
+        
         targetPositiveInstanceList.shuffle(new Random());
         targetNegativeInstanceList.shuffle(new Random());
 
@@ -147,8 +143,8 @@ public class GraphMatrixGenerator
 
         }
 
-        Matrix postsAndLabelsMatrix = new CCSMatrix(totalPosts,1);
-        
+        Matrix postsAndLabelsMatrix = new CCSMatrix(totalPosts, 1);
+
         for (int i = 0; i < totalPosts; i++) {
             Instance instance = combinedInstances.get(i);
             FeatureVector instanceFeatureVector = (FeatureVector) instance.getData();
@@ -166,9 +162,8 @@ public class GraphMatrixGenerator
 
         logger.info("Adjacency Matrix computation completed");
         
-        UCrossClassifier uCrossClassifier = new UCrossClassifier(adjMatrixUsersPosts, adjMatrixPostsVocabularyBinary, postsAndLabelsMatrix, sourceInstanceCount);
-       // uCrossClassifier.classify(100, 2, 0.90);
-        logger.info("Execution Complete...");
+        return new UCrossData(adjMatrixUsersPosts, adjMatrixPostsVocabularyBinary,
+            postsAndLabelsMatrix);
     }
 
     private static List<String> getUniqueUsers(InstanceList posList, InstanceList negList)
