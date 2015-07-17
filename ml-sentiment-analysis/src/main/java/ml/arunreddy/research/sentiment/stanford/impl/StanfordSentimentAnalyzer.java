@@ -94,55 +94,55 @@ public class StanfordSentimentAnalyzer extends AbstractSentimentAnalyzer {
 
   public static void main(String[] args) throws Exception{
 
-	StanfordSentimentAnalyzer stanfordSentimentAnalyzer = new StanfordSentimentAnalyzer();
-    Db db = Ohm.db("/home/arun/media/datasets/ohmdb/semeval-twitter-2013.db");
-    Table<Sentiment> sentimentTable = db.table(Sentiment.class);
-    
-    Set<String> labels = new TreeSet<String>();	
-    int counter =1;
-    int correct =0;
-    int valid = 0;
-    
-    File file = new File("/home/arun/media/datasets/semeval/csv/test.pos");
-    StringBuilder builder = new StringBuilder();
-    for(long id:sentimentTable.ids()){
-    	
-    	Sentiment sentiment = sentimentTable.get(id);
-    	SentimentLabel sentimentLabel = stanfordSentimentAnalyzer.getSentiment(sentiment.getText());
-    	if(sentimentLabel.equals(SentimentLabel.POSITIVE) && sentiment.getLabel().equals("positive")){
-    		correct++;
-    	}
-    	
-    	if(sentimentLabel.equals(SentimentLabel.NEGATIVE) && sentiment.getLabel().equals("negative")){
-    		correct++;
-    	}
+//	StanfordSentimentAnalyzer stanfordSentimentAnalyzer = new StanfordSentimentAnalyzer();
+//    Db db = Ohm.db("/home/arun/media/datasets/ohmdb/semeval-twitter-2013.db");
+//    Table<Sentiment> sentimentTable = db.table(Sentiment.class);
+//    
+//    Set<String> labels = new TreeSet<String>();	
+//    int counter =1;
+//    int correct =0;
+//    int valid = 0;
+//    
+//    File file = new File("/home/arun/media/datasets/semeval/csv/test.pos");
+//    StringBuilder builder = new StringBuilder();
+//    for(long id:sentimentTable.ids()){
 //    	
-//    	System.out.println(sentimentLabel+" -- "+sentiment.getLabel());
-//   
-//    	if(sentiment.getLabel().equals("positive") && sentiment.getInstanceType() == Sentiment.TEST_INSTANCE){
-//    		builder.append( "TW_TE_POS_"+counter+", 1, "+sentiment.getText()+"\n");
-//        	counter++;	
-//    	}
-    	
-//    	if(counter==100){
-//    		break;
+//    	Sentiment sentiment = sentimentTable.get(id);
+//    	SentimentLabel sentimentLabel = stanfordSentimentAnalyzer.getSentiment(sentiment.getText());
+//    	if(sentimentLabel.equals(SentimentLabel.POSITIVE) && sentiment.getLabel().equals("positive")){
+//    		correct++;
 //    	}
 //    	
-//    	if(!sentiment.getLabel().equals("neutral")){
-//    		valid++;
+//    	if(sentimentLabel.equals(SentimentLabel.NEGATIVE) && sentiment.getLabel().equals("negative")){
+//    		correct++;
 //    	}
+////    	
+////    	System.out.println(sentimentLabel+" -- "+sentiment.getLabel());
+////   
+////    	if(sentiment.getLabel().equals("positive") && sentiment.getInstanceType() == Sentiment.TEST_INSTANCE){
+////    		builder.append( "TW_TE_POS_"+counter+", 1, "+sentiment.getText()+"\n");
+////        	counter++;	
+////    	}
 //    	
-    }
-
-    System.out.println(correct);
-    System.out.println(valid);
-    System.out.println(counter);
-
-//	FileWriter writer = new FileWriter(file);
-//	writer.write(builder.toString());
-//	writer.flush();
-//	writer.close();
-    
-    db.shutdown();
+////    	if(counter==100){
+////    		break;
+////    	}
+////    	
+////    	if(!sentiment.getLabel().equals("neutral")){
+////    		valid++;
+////    	}
+////    	
+//    }
+//
+//    System.out.println(correct);
+//    System.out.println(valid);
+//    System.out.println(counter);
+//
+////	FileWriter writer = new FileWriter(file);
+////	writer.write(builder.toString());
+////	writer.flush();
+////	writer.close();
+//    
+//    db.shutdown();
   }
 }

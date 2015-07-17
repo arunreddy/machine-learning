@@ -163,7 +163,7 @@ public class GraphMatrixGenerator
         logger.info("Adjacency Matrix computation completed");
         
         return new UCrossData(adjMatrixUsersPosts, adjMatrixPostsVocabularyBinary,
-            postsAndLabelsMatrix);
+            postsAndLabelsMatrix,sourceInstanceCount);
     }
 
     private static List<String> getUniqueUsers(InstanceList posList, InstanceList negList)

@@ -40,8 +40,6 @@ public class UCrossClassifier
 
     private final Matrix normPostsAndFeaturesMatrix;
 
-    private final int numOfSourceDomainPosts;
-
     private final UCrossData uCrossData;
 
     private static final Logger logger = LoggerFactory.getLogger(UCrossClassifier.class);
@@ -54,11 +52,10 @@ public class UCrossClassifier
      * @param Y_S {@See Matrix} of source domain labels.
      * @param Y_T {@See Matrix} of target domain labels.
      */
-    public UCrossClassifier(UCrossData uCrossData, int numOfSourceDomainPosts)
+    public UCrossClassifier(UCrossData uCrossData)
     {
         // Initialize the matrices.
         this.uCrossData = uCrossData;
-        this.numOfSourceDomainPosts = numOfSourceDomainPosts;
         logger.debug("UCrossClassifier instantiated.");
 
         Matrix normUsersAndPostsMatrix = null;
@@ -99,7 +96,7 @@ public class UCrossClassifier
         int totalPosts = this.normPostsAndFeaturesMatrix.rows();
         int totalFeatures = this.normPostsAndFeaturesMatrix.columns();
 
-        int sourceDomainPosts = this.numOfSourceDomainPosts + noOfSamplesFromTarget;
+        int sourceDomainPosts = this.uCrossData.getNoOfSourceDomainPosts() + noOfSamplesFromTarget;
         int targetDomainPosts = totalPosts - sourceDomainPosts;
 
         int[] userIndices = new int[totalUsers];
@@ -108,18 +105,20 @@ public class UCrossClassifier
         int[] featureIndices = new int[totalFeatures];
 
         // Populate index arrays.
-        for (int i = 0; i < totalUsers; i++)
+        for (int i = 0; i < totalUsers; i++) {
             userIndices[i] = i;
-
-        for (int i = 0; i < sourceDomainPosts; i++)
+            logger.debug("{}",i);
+        }
+        for (int i = 0; i < sourceDomainPosts; i++) {
             sourceDomainPostsIndices[i] = i + totalUsers;
-
-        for (int i = 0; i < targetDomainPosts; i++)
+        }
+        for (int i = 0; i < targetDomainPosts; i++) {
             targetDomainPostsIndices[i] = i + totalUsers + sourceDomainPosts;
-
-        for (int i = 0; i < totalFeatures; i++)
+        }
+        for (int i = 0; i < totalFeatures; i++) {
             featureIndices[i] = i + totalUsers + sourceDomainPosts + targetDomainPosts;
-
+        }
+        
         Matrix s12 = this.normUsersAndPostsMatrix.select(userIndices, sourceDomainPostsIndices);
         Matrix s13 = this.normUsersAndPostsMatrix.select(userIndices, targetDomainPostsIndices);
         Matrix s24 = this.normPostsAndFeaturesMatrix.select(sourceDomainPostsIndices, featureIndices);

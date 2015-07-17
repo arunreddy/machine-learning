@@ -96,31 +96,33 @@ public class BagOfWordsGenerator
         return new SerialPipes(pipeList);
     }
 
-    public void loadData() throws Exception
+    public void loadData(File inputFile, File outFile) throws Exception
     {
-        File file = new File("/home/arun/code/phd/machine-learning/final-senti.dataset");
-        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
+//        File file = new File("/home/arun/code/phd/machine-learning/final-senti.dataset");
+//        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
 
         InstanceList instanceList = new InstanceList(pipe);
 
-        instanceList.addThruPipe(new CsvIterator(new FileReader(file), "(\\w+)\\s+(\\w+)\\s+(.*)", 3, 2, 1) // (data,
+        instanceList.addThruPipe(new CsvIterator(new FileReader(inputFile), "(\\w+)\\s+(\\w+)\\s+(.*)", 3, 2, 1) // (data,
                                                                                                             // target,
                                                                                                             // name)
                                                                                                             // field
                                                                                                             // indices
         );
 
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new FileReader(outFile));
         int count = 0;
         while (reader.ready()) {
             String line = reader.readLine();
-            String line2 = line.substring(line.indexOf('\t'), line.length()).trim();
-            String line3 = line2.substring(line2.indexOf('\t'), line2.length()).trim();
-            Instance instance = instanceList.get(count);
-            instance.unLock();
-            instance.setSource(line3);
-            instance.lock();
-            count++;
+            if(line!=null){
+                String line2 = line.substring(line.indexOf('\t'), line.length()).trim();
+                String line3 = line2.substring(line2.indexOf('\t'), line2.length()).trim();
+                Instance instance = instanceList.get(count);
+                instance.unLock();
+                instance.setSource(line3);
+                instance.lock();
+                count++;   
+            }
         }
 
         System.out.println(instanceList.getAlphabet().size());
@@ -214,9 +216,9 @@ public class BagOfWordsGenerator
 
     }
 
-    public void results()
+    public void results(File outFile)
     {
-        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
+        //File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
         InstanceList instanceList = InstanceList.load(outFile);
 
         System.out.println(instanceList.size());
@@ -252,9 +254,9 @@ public class BagOfWordsGenerator
         }
     }
 
-    public void incrementalClassifier()
+    public void incrementalClassifier(File outFile)
     {
-        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
+//        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
         InstanceList instanceList = InstanceList.load(outFile);
 
         System.out.println(instanceList.size());
@@ -330,22 +332,10 @@ public class BagOfWordsGenerator
         
     }
 
-    public static void main(String[] args) throws Exception
-    {
-        BagOfWordsGenerator generator = new BagOfWordsGenerator();
-        // generator.loadData();
-
-        // generator.tenFoldCrossValidation();
-
-        // generator.results();
-
-        generator.incrementalClassifier();
-    }
-
-    private void tenFoldCrossValidation() throws Exception
+    private void tenFoldCrossValidation(File outFile) throws Exception
     {
         // TODO Auto-generated method stub
-        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
+//        File outFile = new File("/home/arun/code/phd/machine-learning/final-senti.dat");
         InstanceList instanceList = InstanceList.load(outFile);
 
         System.out.println(instanceList.size());

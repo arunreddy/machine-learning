@@ -31,15 +31,26 @@ public class UCrossData
     private final Matrix postsAndFeaturesMatrix;
 
     private final Matrix postsAndLabelsMatrix;
+    
+    private final int noOfSourceDomainPosts;
+
+    /**
+     * @return the noOfSourceDomainPosts
+     */
+    public int getNoOfSourceDomainPosts()
+    {
+        return noOfSourceDomainPosts;
+    }
 
     /**
      * 
      */
-    public UCrossData(Matrix usersAndPostsMatrix, Matrix postsAndFeaturesMatrix, Matrix postsAndLabelsMatrix)
+    public UCrossData(Matrix usersAndPostsMatrix, Matrix postsAndFeaturesMatrix, Matrix postsAndLabelsMatrix, int noOfSourceDomainPosts)
     {
         this.usersAndPostsMatrix = usersAndPostsMatrix;
         this.postsAndFeaturesMatrix = postsAndFeaturesMatrix;
         this.postsAndLabelsMatrix = postsAndLabelsMatrix;
+        this.noOfSourceDomainPosts = noOfSourceDomainPosts;
     }
 
     /**
